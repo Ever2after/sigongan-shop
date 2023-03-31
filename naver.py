@@ -1,4 +1,6 @@
 import requests
+from bs4 import BeautifulSoup
+import pandas as pd
 
 class Naver:
     def __init__(self):
@@ -19,3 +21,9 @@ class Naver:
         }
         response = requests.get(self.url, headers=self.headers, params=payload)
         return response.json()
+    
+    def get_original_url(self, url):
+        response = requests.get(url)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        a = soup.find_all('img')
+        print(a)

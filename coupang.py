@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
+from selenium_test import *
 
 class Coupang:
     def __init__(self):
@@ -45,15 +46,14 @@ class Coupang:
         shipping = soup.find('div', attrs={"class":"prod-shipping-fee-message"}).span.em.get_text()
         description = soup.find('ul', class_="prod-description-attribute").find_all('li')
         description = list(map(lambda x: x.get_text(), description))
-        essential = soup.find_all('table')
-        rating = soup.find('div', attrs={"class":"dp-review__average__total-star__info-orange"})
-        rating_count = soup.find('div', attrs={"class":"sdp-review__average__total-star__info-count"})
+
+        seleniumTest = SeleniumTest(url)
+        imgUrl = seleniumTest.get_img()
+        #seleniumTest.close()
         return {
             'name': name,
             'price': price,
             'shipping': shipping,
             'description': description,
-            #'essential': essential,
-            #'rating': rating,
-            #'rating_count': rating_count
+            'imgUrl': imgUrl,
         }

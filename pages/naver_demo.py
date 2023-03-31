@@ -36,3 +36,8 @@ if st.session_state.df_exist:
     st.write(data.link)
     st.dataframe(st.session_state.df)
 
+url = st.text_input("링크 입력")
+btn2 = st.button("검색", key="btn2")
+if btn2:
+    naver = Naver()
+    naver.get_original_url(url)
