@@ -10,7 +10,7 @@ options.add_argument('--headless')
 options.add_argument('--no-sandbox')
 options.add_argument('--disable-dev-shm-usage')
 options.add_argument('user-agent={0}'.format(user_agent))
-driver = webdriver.Chrome('./chromedriver',options=options)
+driver = webdriver.Chrome('chromedriver',options=options)
 # 아무런 경고가 없다면 이상없이 작동되는 것입니다
 
 class SeleniumTest:

@@ -40,17 +40,17 @@ if btn2:
     ocr = ''
     cnt = 0
     for url in urls:
-        if cnt > 10: # 10장으로 제한
+        if cnt > 7: # 7장으로 제한
             break
         content = requests.get(url).content
         img = Image.open(BytesIO(content))
-        n = math.ceil(0.5* img.height / img.width)
+        n = math.ceil(0.25* img.height / img.width)
         list = []
         for i in range(0, n):
             if (i==n-1):
-                list.append(img.crop((0, i*2*img.width, img.width, img.height)))
+                list.append(img.crop((0, i*4*img.width, img.width, img.height)))
             else:
-                list.append(img.crop((0, i*2*img.width, img.width, (i+1)*2*img.width)))
+                list.append(img.crop((0, i*4*img.width, img.width, (i+1)*4*img.width)))
             cnt += 1
         for el in list:
             buffer = io.BytesIO()
@@ -64,10 +64,18 @@ if btn2:
 
     if len(ocr)>2000:
         ocr = ocr[:2000]
+    alert = ''
+    if len(ocr) == 2000:
+        alert = '2000자 이상의 텍스트가 인식되었습니다'
+    else :
+        alert = f'{len(ocr)}자의 텍스트가 인식되었습니다'
+    st.write(alert)
+    st.write(ocr)
+        
     sigonganAI = SigonganAI('')
     sigonganAI.appendMessage("system", "넌 제품을 판매하기 위한 판매자야. 제품에 대해 자세히 설명해줘.")
     sigonganAI.appendMessage("user", f"제품 정보: {str(json)}\n 제품 상세 정보: {ocr}")
-    sigonganAI.appendMessage("user", "내가 이 제품을 사야 할 이유를 10가지로 정리해줘")
+    sigonganAI.appendMessage("user", "내가 이 제품을 사야 할 가장 중요한 이유를 5가지로 정리해줘. 이 제품만의 특징이 드러나야 해.")
     answer = sigonganAI.getGPT()
-    st.write("[이 제품을 사야 하는 10가지 이유]")
+    st.write("[이 제품을 사야 하는 5가지 이유]")
     st.write(answer)

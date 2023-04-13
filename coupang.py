@@ -29,11 +29,13 @@ class Coupang:
                 price = product.find('strong', attrs={"class":"price-value"})
                 rating = product.find('em', attrs={"class":"rating"})
                 rating_total_count = product.find('span', attrs={"class":"rating-total-count"})
+                link = 'https://www.coupang.com' + product.find('a')['href'].split('?')[0]
                 list.append({
                     "name": name.get_text() if name else name,
                     "price": int(price.get_text().replace(',', '')) if price else price,
                     "rating": float(rating.get_text()) if rating else rating,
                     "rating_total_count": rating_total_count.get_text() if rating_total_count else rating_total_count,
+                    "link": link
                 })
         df = pd.DataFrame(list)
         return df
@@ -57,3 +59,19 @@ class Coupang:
             'description': description,
             'imgUrl': imgUrl,
         }
+        
+    def get_promotion(self):
+        url = "https://partners.coupang.com/#affiliate/ws/events?page=1"
+        response = requests.get(url, headers = self.headers, verify=False)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        items = soup.find_all("div", class_ = "ant-card card--3Bacuk ant-card-hoverable")
+        list = []
+        for item in items:
+            img = item.find("img")['src']
+            desc = item.find("div", class_ = "ant-card-meta-title")
+            list.append({
+                'imgUrl': img,
+                'description': desc,
+            })
+        return pd.DataFrame(list)
+        
