@@ -11,7 +11,7 @@ if btn1:
     df = coupang.get_list(keyword, 1)
     item = df.iloc[1]
     item2 = df.iloc[4]
-    link = 'https://www.coupang.com'+item['link']
+    link = item['link']
     json = coupang.link_search(link)
     st.json(json)
     sigonganAI = SigonganAI('')
