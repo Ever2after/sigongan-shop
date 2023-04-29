@@ -3,3 +3,6 @@ bs4
 pandas
 streamlit
 seaborn
+openai
+dotenv
+

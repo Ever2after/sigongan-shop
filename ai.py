@@ -72,10 +72,14 @@ class SigonganAI:
         self._messages = messages
     
     def getGPT(self):
-        response = openai.ChatCompletion.create(
-            model = "gpt-3.5-turbo",
-            messages = self._messages
-        )
+        try:
+            response = openai.ChatCompletion.create(
+                model = "gpt-3.5-turbo",
+                messages = self._messages
+            )
+        except:
+            return False, False
         answer = response.choices[0].message.content.strip()
+        tokens = response.usage.total_tokens
         self.appendMessage("assistant", answer)
-        return answer
+        return answer, tokens

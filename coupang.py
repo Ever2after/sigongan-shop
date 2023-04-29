@@ -34,7 +34,7 @@ class Coupang:
                     "name": name.get_text() if name else name,
                     "price": int(price.get_text().replace(',', '')) if price else price,
                     "rating": float(rating.get_text()) if rating else rating,
-                    "rating_total_count": rating_total_count.get_text() if rating_total_count else rating_total_count,
+                    "rating_total_count": int(rating_total_count.get_text().replace('(','').replace(')', '')) if rating_total_count else rating_total_count,
                     "link": link
                 })
         df = pd.DataFrame(list)

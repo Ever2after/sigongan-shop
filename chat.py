@@ -1,4 +1,5 @@
 from ai import *
+from coupang import *
 import json
 
 gongan = SigonganAI("")
@@ -40,22 +41,63 @@ def getMoreFeature(info):
     _gongan.appendMessage('user', f'나는 {info["keyword"]}를 구매하려고 해. {info["options"]}의 조건 외에 더 고려해보면 좋을 만한 조건, 선택지를 json으로 제시해줘. json 외 다른 답은 하지마.\
                             예시1: {example1}, 예시2: {example2}')
     answer, _ = _gongan.getGPT()
-    answer = answer.replace('\'', '\"')
+    if (answer):
+        answer = answer.replace('\'', '\"')
+        try:
+            _json = json.loads(answer)
+        except:
+            print(answer)
+            return False
+        return _json
+    else: return False
+
+def getItems(info):
+    keywords = ''
+    options = ''
+    for keyword in info['keyword']:
+        keywords += keyword
+        keywords += ' '
+    for option in info['options']:
+        options += option
+        options += ' '
+    f_keyword = keywords + ' ' + options
+    _coupang = Coupang()
     try:
-        _json = json.loads(answer)
+        item_list = _coupang.get_list(f_keyword, 1)
+        return item_list
     except:
         return False
-    return _json
-
+        
+def semanticParsing(text):
+    _gongan = SigonganAI('')
+    _gongan.appendMessage('user', f'다음 질문이 어떤 의도인지 분류해줘. 중복 선택도 가능해 \
+         카테고리 = ["상품 검색, 추천 요구", "상품에 대한 상세 설명, 판매 정보 요구", "그 외 단순 질문"].     \
+         질문 : {text}.   \
+        ')
+    answer, _ = _gongan.getGPT()
+    list = []
+    if('추천' in answer): list.append(0)
+    elif('설명' in answer): list.append(1)
+    else: list.append(2)
+    return list
 
 while(True):
-    text = input()
-    if("q" in text): break
-    info = extractFeature(text)
-    print(info)
-    if (not info): continue
-    moreOptions = getMoreFeature(info)
-    print(moreOptions)
+    type = input('select type')
+    if ('0' in type):
+        text = input('give a question')
+        answer = semanticParsing(text)
+        print(answer)
+    elif('1' in type):
+        text = input('give a question')
+        if("q" in text): break
+        info = extractFeature(text)
+        print(info)
+        if (not info): continue
+        moreOptions = getMoreFeature(info)
+        print(moreOptions)
+        item_list = getItems(info)
+        print(item_list[:4])
+    else: continue
 
 
 
