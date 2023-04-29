@@ -38,7 +38,7 @@ class Coupang:
                     "link": link
                 })
         df = pd.DataFrame(list)
-        return df
+        return df, list
 
     def link_search(self, url):
         response = requests.get(url, headers = self.headers, verify=False, timeout=(3.05, 27))
