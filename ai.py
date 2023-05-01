@@ -75,7 +75,8 @@ class SigonganAI:
         try:
             response = openai.ChatCompletion.create(
                 model = "gpt-3.5-turbo",
-                messages = self._messages
+                messages = self._messages,
+                temperature = 0.1
             )
         except:
             return False, False

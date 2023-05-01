@@ -9,7 +9,7 @@ class Semantic:
                             ')
         answer, _ = _gongan.getGPT()
         if (not answer): return False
-        elif ('앞서' in answer): return 0
+        elif ('과거' in answer): return 0
         elif('새로운' in answer): return 1
         else: return 2
 
@@ -28,16 +28,26 @@ class Semantic:
     def getFeature(self, text):
         _gongan = SigonganAI("")
         example1 = {
-            "keywords": ["키보드"],
+            "keyword": "키보드",
             "options": ["게이밍", "10만원대", "저렴한", "평점 좋은"]
         }
         example2 = {
-            "keywords": ["원피스", "블라우스"],
-            "options": ["가을에 입을만한", "베이지 계열", "오프숄더"]
+            "keyword": "오프숄더 블라우스",
+            "options": ["가을에 입을만한", "베이지 계열", "에이블리"]
+        }
+        example3 = {
+            "keyword": "모니터 led 등",
+            "options": []
         }
         message = [
-            {"role": "user", "content": f"설명: {text} \n 위 글은 고객이 원하는 상품에 대한 설명이야. 이 상품에 대한 keyword와 option을 나누어서 json 형태로 정리해줘. json 외에 다른 답은 하지마. \
-            예시1: {example1}, 예시2: {example2}."}
+            {"role": "user", "content": f"설명: {text} \n 상품 이름 -> keyword, 상품 조건 -> options. output -> json. json 외에 다른 답은 하지마."},
+            {"role": "user", "content": "평점좋고 저렴한 10만원대 게이밍 키보드 추천해줘"},
+            {"role": "assistant", "content": f"{example1}"},
+            {"role": "user", "content": "가을에 입을 만한 베이지 계열 오프숄더 블라우스 찾아줘. 에이블리에서 파는거면 좋겠어"},
+            {"role": "assistant", "content": f"{example2}"},
+            {"role": "user", "content": "모니터에 다는 led 등 사고싶어"},
+            {"role": "assistant", "content": f"{example3}"},
+            {"role": "user", "content": text}
         ]
         _gongan.initMessage(message)
         answer, _ = _gongan.getGPT()
@@ -62,7 +72,7 @@ class Semantic:
         }
         _gongan = SigonganAI('')
         _gongan.appendMessage('system', '너는 온라인 쇼핑몰의 상품을 소개하는 도우미야.')
-        _gongan.appendMessage('user', f'나는 {info["keywords"]}를 구매하려고 해. {info["options"]}의 조건 외에 더 고려해보면 좋을 만한 조건, 선택지를 json으로 제시해줘. json 외 다른 답은 하지마. \
+        _gongan.appendMessage('user', f'나는 {info["keyword"]}를 구매하려고 해. {info["options"]}의 조건 외에 더 고려해보면 좋을 만한 조건, 선택지를 json으로 제시해줘. json 외 다른 답은 하지마. \
                             예시1: {example1}, 예시2: {example2}')
         answer, _ = _gongan.getGPT()
         if (not answer): return False
