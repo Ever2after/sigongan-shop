@@ -67,6 +67,9 @@ class SigonganAI:
         
     def appendMessage(self, role, content):
         self._messages.append({"role":role, "content":content})
+        
+    def appendMessages(self, messages):
+        self._messages += messages
 
     def initMessage(self, messages):
         self._messages = messages

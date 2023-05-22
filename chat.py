@@ -3,6 +3,7 @@ from coupang import *
 from daangn import *
 from memory import *
 from semantic import *
+from agent import *
 import pandas
 import json
 
@@ -12,6 +13,7 @@ memory = Memory()
 recommendation = Recommendation()
 description = Description('')
 semantic = Semantic()
+agent = Agent()
 
 
 def getItems(info):
@@ -57,12 +59,10 @@ def getItems(info):
     
 def recommendationTemplate(info):
     items = getItems(info)
-    _gongan = SigonganAI('')
-    add_options = []
     if(len(info['options'])<1):
-        add_options = ', '.join(semantic.additionalOptions(info)['options'])
+        #add_options = ', '.join(semantic.additionalOptions(info)['options'])
         template = f'"{info["keyword"]}" 추천 결과입니다. \n'
-        template += f'"{add_options}"에 대해 알려주시면 더 정확한 추천을 드릴 수 있어요! \n'
+        #template += f'"{add_options}"에 대해 알려주시면 더 정확한 추천을 드릴 수 있어요! \n'
         #_gongan.appendMessage('user', f'{template}\n 위 문단에서 적절히 빈칸을 채워줘.')
     else:
         template = f'"{info["keyword"]}" 추천 결과입니다. \n'
@@ -85,42 +85,47 @@ while(True):
         info = semantic.getFeature(text.split('!')[-1])
         print(info)
         break
-    isPast = semantic.past(text)
-    type = semantic.queryType(text)
-    match (isPast, type):
-        case (0, 0):
-            answer = "앞서 제시된 상품과 관련되어 상품 추천을 요구하셨네요."
-            print(answer)
-        case (0, 1):
-            answer = "앞서 제시된 상품에 대해 질문을 주셨군요."
-            print(answer)
-        case (_, 2):
+    memory.appendMessage('user', text)
+    apiType = agent.selectApi(text)
+    apiType = apiType.replace("'", "").strip()
+    print(apiType)
+    answer = ''
+    match (apiType):
+        case ('none'):
             # get normal answer
             _gongan = SigonganAI('')
-            _gongan.initMessage(memory.getMessages(1))
-            _gongan.appendMessage("system", "너는 지금부터 온라인 쇼핑몰의 상품을 추천해주는 도우미야. \
-                     너의 이름은 '공간이' 이고 시공간이란 회사가 만들었어. \
-                     친절하게 대답해줘!\
-                     ")
-            _gongan.appendMessage('user', text)
+            prompt = "너는 지금부터 온라인 쇼핑몰의 상품을 추천해주는 도우미야."
+            prompt += "너의 이름은 '공간이' 이고 시공간이란 회사가 만들었어."
+            prompt += "상냥한 말투로 '짧게' 대답해줘"
+            _gongan.appendMessage("system", prompt)
+            _gongan.appendMessages(memory.getMessages(3))
             answer, _ = _gongan.getGPT()
             print(answer)
             
-        case (1 | 2, 0):
+        case ('itemLists'):
+            prompt = ''
             info = semantic.getFeature(text)
             if (info):
+                print(info)
                 answer = recommendationTemplate(info)
                 print(answer)
             else :
                 answer = "잠시 후에 다시 시도해주세요!"
                 print(answer)
-        case (1 | 2, 1):
-            answer = "상품의 상세 정보에 대한 질문을 주셨군요."
+        case ('pastPrice'):
+            prompt = "아래 질문에 대답해야 하는데 아직 상품의 과거 가격 내역 조회 api를 사용할 수가 없어. 양해 부탁드린다고 대답해줘.\n"
+            prompt += f"질문 내역 : {memory.getMessages(3)}"
+            _gongan = SigonganAI('')
+            _gongan.appendMessage('user', prompt)
+            answer, _ = _gongan.getGPT()
             print(answer)
-        case (_, _):
-            answer = "잠시 후에 다시 시도해주세요!"
+        case ('details'):
+            prompt = "아래 질문에 대답해야 하는데 아직 상품의 상세 정보 조회 api를 사용할 수가 없어. 양해 부탁드린다고 대답해줘.\n"
+            prompt += f"질문 내역 : {memory.getMessages(3)}"
+            _gongan = SigonganAI('')
+            _gongan.appendMessage('user', prompt)
+            answer, _ = _gongan.getGPT()
             print(answer)
     
     # memory update
-    memory.appendMessage('user', text)
     memory.appendMessage('assistant', answer)

@@ -23,7 +23,8 @@ class Semantic:
         if (not answer): return False
         elif('추천' in answer): return 0
         elif('정보' in answer): return 1
-        else: return 2
+        else: return 2    
+        
 
     def getFeature(self, text):
         _gongan = SigonganAI("")
@@ -39,7 +40,7 @@ class Semantic:
             "keyword": "모니터 led 등",
             "options": []
         }
-        message = [
+        messages = [
             {"role": "user", "content": f"설명: {text} \n 상품 이름 -> keyword, 상품 조건 -> options. output -> json. json 외에 다른 답은 하지마."},
             {"role": "user", "content": "평점좋고 저렴한 10만원대 게이밍 키보드 추천해줘"},
             {"role": "assistant", "content": f"{example1}"},
@@ -49,7 +50,7 @@ class Semantic:
             {"role": "assistant", "content": f"{example3}"},
             {"role": "user", "content": text}
         ]
-        _gongan.initMessage(message)
+        _gongan.initMessage(messages)
         answer, _ = _gongan.getGPT()
         if (not answer): return False
 
