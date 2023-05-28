@@ -101,12 +101,10 @@ while(True):
             _gongan.appendMessages(memory.getMessages(3))
             answer, _ = _gongan.getGPT()
             print(answer)
-            
         case ('itemLists'):
             prompt = ''
             info = semantic.getFeature(text)
             if (info):
-                print(info)
                 answer = recommendationTemplate(info)
                 print(answer)
             else :
