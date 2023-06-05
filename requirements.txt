@@ -2,7 +2,4 @@ requests
 bs4
 pandas
 streamlit
-seaborn
 openai
-python3-dotenv
-selenium
