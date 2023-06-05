@@ -8,7 +8,7 @@ class Template:
         prompt += f'아래 상품들을 추천하는 이유를 간결하게 작성해줘\n'
         for idx, item in enumerate(items):
             prompt += f'{idx+1}번째 상품 정보 : {item}\n'
-        prompt += '간단한 상품 추천 이유 2가지 : '
+        prompt += '간단한 상품 추천 이유 3가지 : '
         _gongan.appendMessage('user', prompt)
         answer, _ = _gongan.getGPT()
         answer = f'{keyword} 추천 결과입니다. 조건: {" ".join(options)}\n' + answer       
