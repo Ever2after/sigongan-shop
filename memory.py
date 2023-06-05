@@ -5,15 +5,19 @@ class Memory:
     def initMessage(self, messages):
         self.messages = messages
     
-    def appendMessage(self, role, content):
+    def appendMessage(self, role, content, data):
         self.messages.append({
-            'role': role, 'content': content
+            'role': role, 'content': content, 'data': data
         })
+
+    def appendMessages(self, messages):
+        self.messages.append(messages)
     
     def getMessages(self, n):
         l = len(self.messages)
         n = n if n<=l else l
-        return self.messages[l-n:]
+
+        return self.messages[1-n:], map(lambda x: {'role':x['role'], 'content': x['content'] + ' '.join(map(str, x['data']))}, self.messages[l-n:])
 
 
 class Recommendation:

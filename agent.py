@@ -2,28 +2,26 @@ from ai import *
 
 class Agent():
     def __init__(self):
-        self.apiList = {
+        self.toolList = {
             'itemLists': {
                 'description' : 'get item lists from given keyword',
-                'url' : '/itemlists/[keyword]'
+                'output': '[item1, item2, item3, ...]'
             },
             'details': {
-                'description' : 'get detailed information of certain item such as price, shipping, spec, etc.',
-                'url' : '/details/[itemName]'
-            },
-            'pastPrice': {
-                'description' : 'returns past price history of the item. list of date-price',
-                'url' : '/pastprice/[itemName]'
+                'description' : 'get detailed information of certain item such as price, delivery, spec, review',
+                'output' : '{name, price, delivery date, shipping price, spec, brand, review, ...}'
             },
         }
         
     def selectApi(self, text):
         _gongan = SigonganAI('')
-        prompt = '너는 온라인 쇼핑몰 고객을 응대하는 AI 챗봇이야.'
-        prompt += '너가 질문에 더 잘 대답할 수 있도록 사용할 수 있는 API 리스트를 줄게.'
-        prompt += '아래 질문에 대해 너가 사용할 api를 선택해서 api 이름만 대답해. 다른말 하지마. 적절한 api가 없으면 "none" 이라고 대답해. \n'
-        prompt += f'질문 : {text}\n'
-        prompt += f'API list = {self.apiList}'
+
+        prompt = 'You are the online shopping mall AI guidence. Client will tell you what they want to buy.'
+        prompt += 'You should determine the appropriate tool to use at answering the following question. If you cant find appropriate tool, say "none".'
+        prompt += 'You can only say the name of the tool. \n'
+        prompt += f'Convesation : {text}\n'
+        prompt += f'Tool list = {self.toolList}'
+
         _gongan.appendMessage('user', prompt)
         answer, _ = _gongan.getGPT()
         return answer
