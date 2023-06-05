@@ -76,36 +76,34 @@ class Chat4me:
         apiType = self.agent.selectApi(text)
         apiType = apiType.replace("'", "").strip()
         answer = ''
-        print(apiType)
-        match (apiType):
-            case ('none'):
-                # get normal answer
-                _gongan = SigonganAI('')
-                prompt = "너는 지금부터 온라인 쇼핑몰의 상품을 추천해주는 도우미야."
-                prompt += "너의 이름은 '포미' 이고 시공간이란 회사가 만들었어."
-                prompt += "귀여운 말투로 '짧게' '존댓말'로 대답해줘"
-                _gongan.appendMessage("system", prompt)
-                _gongan.appendMessages(self.memory.getMessages(3))
-                answer, _ = _gongan.getGPT()
-            case ('itemLists'):
-                prompt = ''
-                info = self.semantic.getFeature(text)
-                if (info):
-                    answer = self.recommendationTemplate(info)
-                else :
-                    answer = "잠시 후에 다시 시도해주세요!"
-            case ('pastPrice'):
-                prompt = "아래 질문에 대답해야 하는데 아직 상품의 과거 가격 내역 조회 api를 사용할 수가 없어. 양해 부탁드린다고 대답해줘.\n"
-                prompt += f"질문 내역 : {self.memory.getMessages(3)}"
-                _gongan = SigonganAI('')
-                _gongan.appendMessage('user', prompt)
-                answer, _ = _gongan.getGPT()
-            case ('details'):
-                prompt = "아래 질문에 대답해야 하는데 아직 상품의 상세 정보 조회 api를 사용할 수가 없어. 양해 부탁드린다고 대답해줘.\n"
-                prompt += f"질문 내역 : {self.memory.getMessages(3)}"
-                _gongan = SigonganAI('')
-                _gongan.appendMessage('user', prompt)
-                answer, _ = _gongan.getGPT()
+        if(apiType == 'none'):
+            # get normal answer
+            _gongan = SigonganAI('')
+            prompt = "너는 지금부터 온라인 쇼핑몰의 상품을 추천해주는 도우미야."
+            prompt += "너의 이름은 '포미' 이고 시공간이란 회사가 만들었어."
+            prompt += "귀여운 말투로 '짧게' '존댓말'로 대답해줘"
+            _gongan.appendMessage("system", prompt)
+            _gongan.appendMessages(self.memory.getMessages(3))
+            answer, _ = _gongan.getGPT()
+        elif(apiType == 'itemLists'):
+            prompt = ''
+            info = self.semantic.getFeature(text)
+            if (info):
+                answer = self.recommendationTemplate(info)
+            else :
+                answer = "잠시 후에 다시 시도해주세요!"
+        elif(apiType == 'pastType'):
+            prompt = "아래 질문에 대답해야 하는데 아직 상품의 과거 가격 내역 조회 api를 사용할 수가 없어. 양해 부탁드린다고 대답해줘.\n"
+            prompt += f"질문 내역 : {self.memory.getMessages(3)}"
+            _gongan = SigonganAI('')
+            _gongan.appendMessage('user', prompt)
+            answer, _ = _gongan.getGPT()
+        elif(apiType == 'details'):
+            prompt = "아래 질문에 대답해야 하는데 아직 상품의 상세 정보 조회 api를 사용할 수가 없어. 양해 부탁드린다고 대답해줘.\n"
+            prompt += f"질문 내역 : {self.memory.getMessages(3)}"
+            _gongan = SigonganAI('')
+            _gongan.appendMessage('user', prompt)
+            answer, _ = _gongan.getGPT()
         
         # memory update
         self.memory.appendMessage('assistant', answer)
