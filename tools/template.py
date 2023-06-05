@@ -10,5 +10,6 @@ class Template:
             prompt += f'{idx+1}번째 상품 정보 : {item}\n'
         prompt += '간단한 상품 추천 이유 2가지 : '
         _gongan.appendMessage('user', prompt)
-        answer, _ = _gongan.getGPT()       
+        answer, _ = _gongan.getGPT()
+        answer = f'{keyword} 추천 결과입니다. 조건: {" ".join(options)}\n' + answer       
         return answer

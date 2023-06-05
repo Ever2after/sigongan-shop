@@ -16,8 +16,8 @@ class Agent():
     def selectApi(self, text):
         _gongan = SigonganAI('')
 
-        prompt = 'You are the online shopping mall AI guidence. Client will tell you what they want to buy.'
-        prompt += 'You should determine the appropriate tool to use at answering the following question. If you cant find appropriate tool, say "none".'
+        prompt = 'You are the online shopping mall AI guidence.'
+        prompt += 'You should determine the appropriate tool to use at answering the following question. If dont need any tools, say "none".'
         prompt += 'You can only say the name of the tool. \n'
         prompt += f'Convesation : {text}\n'
         prompt += f'Tool list = {self.toolList}'
