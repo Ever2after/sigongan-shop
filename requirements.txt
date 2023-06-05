@@ -1,5 +1,9 @@
 requests
 bs4
+selenium
 pandas
 streamlit
 openai
+fastapi
+uvicorn
+python-dotenv

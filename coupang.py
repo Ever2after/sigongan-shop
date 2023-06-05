@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
-from selenium_test import *
+#from selenium_test import *
 
 class Coupang:
     def __init__(self):
@@ -49,15 +49,15 @@ class Coupang:
         description = soup.find('ul', class_="prod-description-attribute").find_all('li')
         description = list(map(lambda x: x.get_text(), description))
 
-        seleniumTest = SeleniumTest(url)
-        imgUrl = seleniumTest.get_img()
+        #seleniumTest = SeleniumTest(url)
+        #imgUrl = seleniumTest.get_img()
         #seleniumTest.close()
         return {
             'name': name,
             'price': price,
             'shipping': shipping,
             'description': description,
-            'imgUrl': imgUrl,
+            #'imgUrl': imgUrl,
         }
         
     def get_promotion(self):
