@@ -6,6 +6,7 @@ from pydantic import BaseModel
 
 wd = Path(__file__).parent.parent.resolve()
 sys.path.append(str(wd))
+sys.path.append('../tools')
 
 from chat import *
 
@@ -26,6 +27,9 @@ def root():
 
 @app.get("/chat/{input}")
 def get_output(input: str):
-    print(input)
-    output = chat.getChat(input, [])
-    return {'output' : output}
+    type, message, data = chat.getChat(input, [])
+    return {
+        'type': type,
+        'message': message,
+        'data': data
+    }
