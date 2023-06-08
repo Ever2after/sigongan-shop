@@ -61,3 +61,18 @@ class Parser:
             print(answer)
             return False
         return _json
+
+    def getReportTitle(self, text):
+        prompt = '아래 문의 내용을 아주 짧은 제목으로 요약해줘\n'
+        prompt += '[예시1]\n'
+        prompt += '문의 내용 : 8만원 이하의 들고 다닐 수 있는 녹음기를 추천해주세요. 5시간 이상 녹음이 가능했으면 좋겠어요.\n'
+        prompt += '제목 : 휴대용 녹음기\n'
+        prompt += '[예시2]\n'
+        prompt += '문의 내용 : 어깨끈이 달린 오프숄더 블라우스를 사고싶은데 색은 상관없구 아무 무늬가 없고 프릴 달린거나 레이스가 있어도 상관없어요.\n'
+        prompt += '제목 : 오프숄더 블라우스\n'
+        prompt += f'문의 내용 : {text}\n'
+        prompt += '제목 : '
+        _gongan = SigonganAI('')
+        _gongan.appendMessage('user', prompt)
+        answer, _ = _gongan.getGPT()
+        return answer
