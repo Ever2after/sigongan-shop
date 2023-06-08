@@ -1,7 +1,6 @@
 import sys
 from pathlib import Path
-from typing import Union
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from pydantic import BaseModel
 
 wd = Path(__file__).parent.parent.resolve()
@@ -35,8 +34,10 @@ def get_output(input: str):
     }
 
 @app.post('/chat')
-def get_answer(msg: Message):
-    type, message, data = _chat.getChat(msg.content, [])
+async def get_answer(request: Request):
+    body = await request.json()
+    content = body['action']['params']['content']
+    type, message, data = _chat.getChat(content, [])
     return {
         'type': type,
         'message': message,
