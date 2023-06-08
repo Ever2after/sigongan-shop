@@ -2,6 +2,7 @@ from ai import *
 from memory import *
 from agent import *
 from tools import parser, shop_item, template
+import time
 
 class Chat4me:
     def __init__(self):
@@ -70,20 +71,45 @@ class Chat4me:
         else: return False
 
     def getChat(self, text, messages=[]):
+        latency = []
         self.memory.appendMessage('user', text, [])
+
+        # select api latency
+        start = time.time()
         apiType = self.agent.selectApi(text)
+        end = time.time()
+        latency.append(end-start)
+
         apiType = apiType.replace("'", "").strip()
         answer = ''
+
         data = []
         if('itemLists' in apiType):
             prompt = ''
+
+            # get feature latency
+            start = time.time()
             info = self.parser.getFeature(text)
+            end = time.time()
+            latency.append(end-start)
+
             if (info):
                 #answer = self.recommendationTemplate(info)
                 _item = shop_item.ShopItem()
                 _template = template.Template()
+
+                # search item latency
+                start = time.time()
                 data = _item.getItems(info['keyword'], info['options'], 3)
-                answer = _template.itemReccommend(data, info['keyword'], info['options'])
+                end = time.time()
+                latency.append(end-start)
+
+                # promotion generation latency
+                start = time.time()
+                #answer = _template.itemReccommend(data, info['keyword'], info['options'])
+                answer = _template.itemIntro(data, info['keyword'], info['options'])
+                end = time.time()
+                latency.append(end-start)
             else :
                 answer = "잠시 후에 다시 시도해주세요!"
         elif('details' in apiType):
@@ -96,8 +122,11 @@ class Chat4me:
 
             _, _messages = self.memory.getMessages(3)
             _gongan.appendMessages(_messages)
-
+            
+            start = time.time()
             answer, _ = _gongan.getGPT()
+            end = time.time()
+            latency.append(end-start)
         else:
             # get normal answer
             _gongan = SigonganAI('')
@@ -109,9 +138,17 @@ class Chat4me:
             _, _messages = self.memory.getMessages(3)
             _gongan.appendMessages(_messages)
 
+            start = time.time()
             answer, _ = _gongan.getGPT()
+            end = time.time()
+            latency.append(end-start)
+        
+        # print total latency
+        print(latency)
+
         # memory update
         self.memory.appendMessage('assistant', answer, data)
+
         return apiType, answer, data
 
 if __name__ == '__main__':
