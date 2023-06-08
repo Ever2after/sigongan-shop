@@ -16,10 +16,8 @@ app = FastAPI()
 _chat = Chat4me()
 _parser = parser.Parser()
 
-class Item(BaseModel):
-    name: str
-    price: float
-    is_offer: Union[bool, None] = None
+class Message(BaseModel):
+    content : str
 
 
 @app.get("/")
@@ -30,6 +28,15 @@ def root():
 @app.get("/chat/{input}")
 def get_output(input: str):
     type, message, data = _chat.getChat(input, [])
+    return {
+        'type': type,
+        'message': message,
+        'data': data
+    }
+
+@app.post('/chat')
+def get_answer(msg: Message):
+    type, message, data = _chat.getChat(msg.content, [])
     return {
         'type': type,
         'message': message,
