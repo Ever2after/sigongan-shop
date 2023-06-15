@@ -122,7 +122,7 @@ class Chat4me:
             prompt += "귀여운 말투로 '짧게' '존댓말'로 대답해줘"
             _gongan.appendMessage("system", prompt)
 
-            _, _messages = self.memory.getMessages(3)
+            _, _messages = self.memory.getMessages(5)
             _gongan.appendMessages(_messages)
             
             start = time.time()
@@ -137,7 +137,7 @@ class Chat4me:
             prompt += "귀여운 말투로 '짧게' '존댓말'로 대답해줘"
             _gongan.appendMessage("system", prompt)
 
-            _, _messages = self.memory.getMessages(3)
+            _, _messages = self.memory.getMessages(5)
             _gongan.appendMessages(_messages)
 
             start = time.time()
