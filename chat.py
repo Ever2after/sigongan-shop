@@ -103,11 +103,13 @@ class Chat4me:
                 data = _item.getItems(info['keyword'], info['options'], 3)
                 end = time.time()
                 latency.append(end-start)
-
+                
                 # promotion generation latency
                 start = time.time()
                 #answer = _template.itemReccommend(data, info['keyword'], info['options'])
-                answer = _template.itemIntro(data, info['keyword'], info['options'])
+                intro = _template.itemIntro(data, info['keyword'], info['options'])
+                display = _template.itemDisplay(data, info['keyword'], info['options'])
+                answer = intro + display
                 end = time.time()
                 latency.append(end-start)
             else :
@@ -154,5 +156,5 @@ class Chat4me:
 if __name__ == '__main__':
     chat = Chat4me()
     text = input()
-    answer = chat.getChat(text)
+    apiType, answer, data = chat.getChat(text)
     print(answer)

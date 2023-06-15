@@ -30,4 +30,4 @@ class Naver:
 
 if __name__ == '__main__':
     naver = Naver()
-    print(naver.get_list('게이밍 헤드셋', 10))
+    print(naver.get_list('맥북', 10))

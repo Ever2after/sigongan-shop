@@ -4,11 +4,11 @@ class Agent():
     def __init__(self):
         self.toolList = {
             'itemLists': {
-                'description' : 'get item lists from given keyword',
+                'description' : 'search item lists from given keyword. you can use it for product recommendation',
                 'output': '[item1, item2, item3, ...]'
             },
             'details': {
-                'description' : 'get detailed information of certain item such as price, delivery, spec, review',
+                'description' : 'get detailed information of specific item such as price, delivery, spec, review',
                 'output' : '{name, price, delivery date, shipping price, spec, brand, review, ...}'
             },
         }

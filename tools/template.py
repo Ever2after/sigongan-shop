@@ -27,3 +27,20 @@ class Template:
         '''
         answer = f'{keyword} 추천 결과입니다. 조건: {" / ".join(options)}\n' #+ answer       
         return answer
+    
+    def itemDisplay(self, items, keyword, options):
+        display = ''
+        for item in items:
+            display += '\n'
+            if(item['api']=='coupang'):
+                display += f'상품명: {item["name"]}\n'
+                display += f'가격: {item["price"]} (쿠팡)\n'
+                display += f'리뷰: {item["reviews"]}, 평점: {item["ratings"]}\n'
+                display += f'링크: https://www.coupang.com/vp/products/{item["group"]}\n'
+            elif(item['api']=='naver'):
+                display += f'상품명: {item["title"]}\n'
+                display += f'가격: {item["lprice"]} ({item["mallName"]})\n'
+                display += f'리뷰: {item["reviews"]}, 평점: {item["ratings"]}\n'
+                display += f'링크: https://www.coupang.com/vp/products/{item["id"]}\n'
+                
+        return display
