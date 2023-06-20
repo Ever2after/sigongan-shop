@@ -24,22 +24,14 @@ def root():
     return {"Hello": "World"}
 
 
-@app.get("/chat/{input}")
-def get_output(input: str):
-    type, message, data = _chat.getChat(input, [])
-    return {
-        'type': type,
-        'message': message,
-        'data': data
-    }
-
 @app.post('/chat')
 async def get_answer(request: Request):
     body = await request.json()
-    content = body['action']['params']['content']
-    type, message, data = _chat.getChat(content, [])
+    #print(body)
+    msgs = body['messages']
+    data = body['data']
+    _, message, data = _chat.getChat(msgs, data)
     return {
-        'type': type,
         'message': message,
         'data': data
     }

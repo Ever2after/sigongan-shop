@@ -13,7 +13,8 @@ class Agent():
             },
         }
         
-    def selectApi(self, text):
+    def selectApi(self, messages, data):
+        text = messages[-1]['content']
         _gongan = SigonganAI('')
 
         prompt = 'You are the online shopping mall AI guidence.'

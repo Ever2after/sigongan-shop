@@ -1,7 +1,8 @@
 from ai import *
 
 class Parser:
-    def getFeature(self, text):
+    def getFeature(self, messages, data):
+        text = messages[-1]['content']
         _gongan = SigonganAI("")
         example1 = {
             "keyword": "키보드",

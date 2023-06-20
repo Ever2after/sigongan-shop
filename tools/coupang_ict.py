@@ -7,18 +7,31 @@ class CoupangICT:
         
     def get_items_by_keyword(self, keyword):
         response = requests.get(self.url + '?keyword=' + keyword, headers = self.headers)
+        try:
+            response.raise_for_status()
+        except:
+            return False
         return response.json()
     
     def get_item_by_id(self, product_id):
         response = requests.get(self.url + '/' + product_id, headers = self.headers)
+        try:
+            response.raise_for_status()
+        except:
+            return False
         return response.json()
     
     def get_history(self, product_id):
         response = requests.get(self.url + '/' + product_id + '/histories', headers = self.headers)
+        try:
+            response.raise_for_status()
+        except:
+            return False
         return response.json()
 
 if __name__ == '__main__':
     coupang = CoupangICT()
-    items = coupang.get_items_by_keyword('게이밍 키보드')
-    print(items)
+    #items = coupang.get_items_by_keyword('게이밍 키보드')
+    item = coupang.get_item_by_id('5613493496')
+    print(item)
     
