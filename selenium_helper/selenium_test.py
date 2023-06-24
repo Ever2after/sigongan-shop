@@ -39,7 +39,7 @@ class SeleniumTest:
 
     def get_img(self):
         list = []
-        imgs = driver.find_elements(By.CLASS_NAME, "prod-buy-header__title") # "subType-IMAGE")
+        imgs = driver.find_elements(By.CLASS_NAME, "subType-IMAGE") # "subType-IMAGE")
         print(imgs)
         for img in imgs:
             list.append(img.find_element(By.TAG_NAME, "img").get_attribute("src"))
@@ -50,6 +50,16 @@ class SeleniumTest:
 
 
 if __name__ == '__main__':
+    user_agent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.50 Safari/537.36'
+
+    options = webdriver.ChromeOptions()
+    options.add_argument('--headless')
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-dev-shm-usage')
+    options.add_argument('user-agent={0}'.format(user_agent))
+    driver = webdriver.Chrome('chromedriver',options=options)
+    # 아무런 경고가 없다면 이상없이 작동되는 것입니다
+    
     sel = SeleniumTest('https://www.coupang.com/vp/products/172740098')
     imgs = sel.get_img()
     print(imgs)
