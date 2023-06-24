@@ -39,7 +39,8 @@ class SeleniumTest:
 
     def get_img(self):
         list = []
-        imgs = driver.find_elements(By.CLASS_NAME, "subType-IMAGE")
+        imgs = driver.find_elements(By.CLASS_NAME, "prod-buy-header__title") # "subType-IMAGE")
+        print(imgs)
         for img in imgs:
             list.append(img.find_element(By.TAG_NAME, "img").get_attribute("src"))
         return list
@@ -48,5 +49,8 @@ class SeleniumTest:
         driver.close()
 
 
-
+if __name__ == '__main__':
+    sel = SeleniumTest('https://www.coupang.com/vp/products/172740098')
+    imgs = sel.get_img()
+    print(imgs)
 

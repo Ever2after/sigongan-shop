@@ -1,7 +1,14 @@
 import requests
+import sys
+from pathlib import Path
 from bs4 import BeautifulSoup
 import pandas as pd
-#from selenium_test import *
+
+wd = Path(__file__).parent.parent.resolve()
+sys.path.append(str(wd))
+sys.path.append('../selenium_helper')
+from selenium_helper import selenium_test
+
 
 class Coupang:
     def __init__(self):
@@ -41,7 +48,7 @@ class Coupang:
         return df, list
 
     def link_search(self, url):
-        response = requests.get(url, headers = self.headers, verify=False, timeout=(3.05, 27))
+        response = requests.get(url, headers = self.headers, verify=False)
         soup = BeautifulSoup(response.text, 'html.parser')
         name = soup.find('h2', attrs={"class":"prod-buy-header__title"}).get_text()
         price = soup.find('span', attrs={"class":"total-price"}).strong.get_text()
@@ -49,15 +56,15 @@ class Coupang:
         description = soup.find('ul', class_="prod-description-attribute").find_all('li')
         description = list(map(lambda x: x.get_text(), description))
 
-        #seleniumTest = SeleniumTest(url)
-        #imgUrl = seleniumTest.get_img()
-        #seleniumTest.close()
+        seleniumTest = selenium_test.SeleniumTest(url)
+        imgUrl = seleniumTest.get_img()
+        
         return {
             'name': name,
             'price': price,
             'shipping': shipping,
             'description': description,
-            #'imgUrl': imgUrl,
+            'imgUrl': imgUrl,
         }
         
     def get_promotion(self):
@@ -74,4 +81,9 @@ class Coupang:
                 'description': desc,
             })
         return pd.DataFrame(list)
-        
+
+if __name__ == '__main__':
+    url = 'https://www.coupang.com/vp/products/172740098'
+    coupang = Coupang()
+    data = coupang.link_search(url)
+    print(data)
