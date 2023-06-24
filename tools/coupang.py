@@ -3,11 +3,13 @@ import sys
 from pathlib import Path
 from bs4 import BeautifulSoup
 import pandas as pd
+from selenium.webdriver.common.by import By
 
 wd = Path(__file__).parent.parent.resolve()
 sys.path.append(str(wd))
 sys.path.append('../selenium_helper')
 from selenium_helper import selenium_test
+from ai import *
 
 
 class Coupang:
@@ -55,37 +57,35 @@ class Coupang:
         shipping = soup.find('div', attrs={"class":"prod-shipping-fee-message"}).span.em.get_text()
         description = soup.find('ul', class_="prod-description-attribute").find_all('li')
         description = list(map(lambda x: x.get_text(), description))
-
-        sel = selenium_test.SeleniumTest()
-        sel.initDriver(url)
-        imgUrl = sel.get_coupang_img()
-        sel.quit()
-
         return {
             'name': name,
             'price': price,
             'shipping': shipping,
             'description': description,
-            'imgUrl': imgUrl,
         }
         
-    def get_promotion(self):
-        url = "https://partners.coupang.com/#affiliate/ws/events?page=1"
-        response = requests.get(url, headers = self.headers, verify=False)
-        soup = BeautifulSoup(response.text, 'html.parser')
-        items = soup.find_all("div", class_ = "ant-card card--3Bacuk ant-card-hoverable")
+    def get_imageUrl(self, url):
+        driver = selenium_test.SeleniumTest().initDriver(url)
         list = []
-        for item in items:
-            img = item.find("img")['src']
-            desc = item.find("div", class_ = "ant-card-meta-title")
-            list.append({
-                'imgUrl': img,
-                'description': desc,
-            })
-        return pd.DataFrame(list)
+        imgs = driver.find_elements(By.CLASS_NAME, "subType-IMAGE")
+        for img in imgs:
+            list.append(img.find_element(By.TAG_NAME, "img").get_attribute("src"))
+        driver.quit()
+        return list
+    
+    def image_read(self, url):
+        imgUrl = self.get_imageUrl(url)
+        gongan = SigonganAI()
+        _context, _chunks = gongan.imageProcessor(imgUrl)
+        context = ''
+        for _chunk in _chunks:
+            if len(_chunk)>40:
+                context += _chunk
+                context += '\n'
+        return context
 
 if __name__ == '__main__':
     url = 'https://www.coupang.com/vp/products/172740098'
     coupang = Coupang()
-    data = coupang.link_search(url)
-    print(data)
+    text = coupang.link_search(url)
+    print(text)

@@ -1,9 +1,10 @@
-from ai import *
+#from ai import *
+import re
 
 class Parser:
     def getFeature(self, messages, data):
         text = messages[-1]['content']
-        _gongan = SigonganAI("")
+        _gongan = SigonganAI()
         example1 = {
             "keyword": "키보드",
             "options": ["게이밍", "10만원대", "저렴한", "평점 좋은"]
@@ -47,7 +48,7 @@ class Parser:
         example2 = {
             "options": ["맛", "용량", "탄산여부"]
         }
-        _gongan = SigonganAI('')
+        _gongan = SigonganAI()
         _gongan.appendMessage('system', '너는 온라인 쇼핑몰의 상품을 소개하는 도우미야.')
         _gongan.appendMessage('user', f'나는 {info["keyword"]}를 구매하려고 해. {info["options"]}의 조건 외에 더 고려해보면 좋을 만한 조건, 선택지를 json으로 제시해줘. json 외 다른 답은 하지마. \
                             예시1: {example1}, 예시2: {example2}')
@@ -73,7 +74,15 @@ class Parser:
         prompt += '제목 : 오프숄더 블라우스\n'
         prompt += f'문의 내용 : {text}\n'
         prompt += '제목 : '
-        _gongan = SigonganAI('')
+        _gongan = SigonganAI()
         _gongan.appendMessage('user', prompt)
         answer, _ = _gongan.getGPT()
         return answer
+    
+if __name__ == '__main__':
+    result = re.findall("(https:\/\/)|(coupang.com\/vp\/products\/[0-9]*)", "안녕하세요. 이거 사이트 https://www.coupang.com/vp/products/172740098?isAddedCart=랑 비슷한 상품좀 추천해주세요")
+    #result = re.match('.*', '시발롬들아')
+    list = []
+    for el in result:
+        list.append(''.join(el))
+    print(''.join(list))
