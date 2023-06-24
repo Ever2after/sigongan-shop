@@ -56,9 +56,11 @@ class Coupang:
         description = soup.find('ul', class_="prod-description-attribute").find_all('li')
         description = list(map(lambda x: x.get_text(), description))
 
-        seleniumTest = selenium_test.SeleniumTest(url)
-        imgUrl = seleniumTest.get_img()
-        
+        sel = selenium_test.SeleniumTest()
+        sel.initDriver(url)
+        imgUrl = sel.get_coupang_img()
+        sel.quit()
+
         return {
             'name': name,
             'price': price,
