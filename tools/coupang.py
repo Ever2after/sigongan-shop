@@ -50,7 +50,7 @@ class Coupang:
         return df, list
 
     def link_search(self, url):
-        response = requests.get(url, headers = self.headers, verify=False)
+        response = requests.get(url, headers = self.headers)
         soup = BeautifulSoup(response.text, 'html.parser')
         name = soup.find('h2', attrs={"class":"prod-buy-header__title"}).get_text()
         price = soup.find('span', attrs={"class":"total-price"}).strong.get_text()
@@ -73,19 +73,13 @@ class Coupang:
         driver.quit()
         return list
     
-    def image_read(self, url):
+    async def image_read(self, url):
         imgUrl = self.get_imageUrl(url)
         gongan = SigonganAI()
-        _context, _chunks = gongan.imageProcessor(imgUrl)
+        _context, _chunks = await gongan.imageProcessor(imgUrl)
         context = ''
         for _chunk in _chunks:
             if len(_chunk)>40:
                 context += _chunk
                 context += '\n'
         return context
-
-if __name__ == '__main__':
-    url = 'https://www.coupang.com/vp/products/172740098'
-    coupang = Coupang()
-    text = coupang.link_search(url)
-    print(text)

@@ -1,4 +1,4 @@
-#from ai import *
+from ai import *
 import re
 
 class Parser:
@@ -37,6 +37,8 @@ class Parser:
         try:
             _json = json.loads(answer)
         except:
+            return False
+        if _json['keyword'] == '':
             return False
         return _json
     
@@ -79,10 +81,30 @@ class Parser:
         answer, _ = _gongan.getGPT()
         return answer
     
-if __name__ == '__main__':
-    result = re.findall("(https:\/\/)|(coupang.com\/vp\/products\/[0-9]*)", "안녕하세요. 이거 사이트 https://www.coupang.com/vp/products/172740098?isAddedCart=랑 비슷한 상품좀 추천해주세요")
-    #result = re.match('.*', '시발롬들아')
-    list = []
-    for el in result:
-        list.append(''.join(el))
-    print(''.join(list))
+    def summaryDetails(self, text):
+        example1 = [
+            '7.1채널의 서라운드 기술로 더 우수한 입체 사운드 제공',
+            '정확한 사운드 방향을 전달하여 게이머에게 최적화된 게이밍 헤드셋',
+            'C-MEDIA사의 CM108B 칩셋을 장착하여 생생한 음질의 사운드 제공',
+            '밀폐형 디자인 적용으로 편안하고 안락한 착용감 제공',
+            '마이크 120도 방향 조절 가능, 고감도 플렉시블 마이크 탑재'
+        ]
+        example2 = [
+            '대두식이섬유 2,000mg 함유 (1팩(190mL)기준)',
+            '콩의 비린맛 없애고 풍부한 맛을 위한 특수 공법(EI) 적용',
+            'HACCP 인증 및 엄격한 품질관리',
+            '환경을 생각한 국제산림협의회 인증 종이팩'
+        ]
+        prompt = '아래는 어떤 상품에 대한 프로모션 문구들이야\n'
+        prompt += '각 문단별로 중요한 내용들을 깔끔하게 정리해줘\n'
+        prompt += '만약에 규칙이 없거나 어색한 글들은 무시하고 정리하지 마\n'
+        prompt += f'[예시1] : {example1}\n'
+        prompt += f'[예시2] : {example2}\n'
+        prompt += f'프로모션 문구 : {text}\n'
+        prompt += f'10가지 이하로 정리해줘'
+        prompt += '정리 내용 : '
+        _gongan = SigonganAI()
+        _gongan.initMessage([{'role': 'system', 'content': '너는 이제 상품에 대해 설명하고 정리하는 도우미야'}])
+        _gongan.appendMessage('user', prompt)
+        answer, _ = _gongan.getGPT('gpt-3.5-turbo-16k-0613')
+        return answer

@@ -2,6 +2,7 @@ import sys
 from pathlib import Path
 from fastapi import FastAPI, Request
 from pydantic import BaseModel
+import asyncio
 
 wd = Path(__file__).parent.parent.resolve()
 sys.path.append(str(wd))
@@ -27,10 +28,9 @@ def root():
 @app.post('/chat')
 async def get_answer(request: Request):
     body = await request.json()
-    #print(body)
     msgs = body['messages']
     data = body['data']
-    _, message, data = _chat.getChat(msgs, data)
+    message, data = await _chat.getChat(msgs, data)
     return {
         'message': message,
         'data': data

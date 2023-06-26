@@ -11,6 +11,9 @@ import base64
 import math
 import io
 import time
+import asyncio
+import aiohttp
+import math
 
 load_dotenv()
 
@@ -25,7 +28,7 @@ class SigonganAI:
     def __init__(self):
         self._messages = []
 
-    def imgOCR(self, url, type = ''):
+    async def imgOCR(self, url, session, type = ''):
         # Naver clova OCR
         if(type=="url"):
             request_json = {
@@ -58,114 +61,101 @@ class SigonganAI:
             'X-OCR-SECRET': clova_ocr_secret_key,
             'Content-Type': 'application/json'
         }
-        response = requests.request("POST", clova_ocr_apigw_url, headers=headers, data = payload)
-        result = response.json()
-        texts = result['images'][0]['fields']
-        context = ''
+        async with session.post(clova_ocr_apigw_url, headers=headers, data = payload) as response:
+            result = await response.json()
+            texts = result['images'][0]['fields']
+            context = ''
+            cluster = []
+            for text in texts:
+                ### whole
+                context += text['inferText']
+                if (text['lineBreak']):
+                    context += '\n'
+                else: 
+                    context += ' '
+                
+                ### cluster
+                dist = []
+                vertices = text['boundingPoly']['vertices']
+                if cluster == []:
+                    cluster.append([text])
+                    continue
+                prev_chunks = cluster[-3:]
+                for chunk in prev_chunks:
+                    dx = 0
+                    dy = 0
+                    prev_vertices = chunk[-1]['boundingPoly']['vertices']
+                    for i in range(0,4):
+                        dx += (vertices[i]['x'] - prev_vertices[i]['x']) / 16
+                        dy += (vertices[i]['y'] - prev_vertices[i]['y']) / 4
+                    dx = abs(dx)
+                    dy = abs(dy)
+                    dist.append((dx**2 + dy**2)**0.5)
+                min_dist = min(dist)
+                if(min_dist > 200):
+                    cluster.append([text])
+                else:
+                    idx = len(cluster) + dist.index(min_dist) - min([len(cluster), 3])
+                    cluster[idx].append(text)
+            chunks = []
+            for chunk in cluster:
+                chunk_ctx = ''
+                for text in chunk:
+                    chunk_ctx += text['inferText']
+                    if text['lineBreak']: chunk_ctx += '\n'
+                    else: chunk_ctx += ' '
+                chunks.append(chunk_ctx)
+            return context, chunks
 
-        start = time.time()
-        cluster = []
-        for text in texts:
-            ### whole
-            context += text['inferText']
-            if (text['lineBreak']):
-                context += '\n'
-            else: 
-                context += ' '
-            
-            ### cluster
-            dist = []
-            vertices = text['boundingPoly']['vertices']
-            if cluster == []:
-                cluster.append([text])
-                continue
-            prev_chunks = cluster[-3:]
-            for chunk in prev_chunks:
-                dx = 0
-                dy = 0
-                prev_vertices = chunk[-1]['boundingPoly']['vertices']
-                for i in range(0,4):
-                    dx += (vertices[i]['x'] - prev_vertices[i]['x']) / 16
-                    dy += (vertices[i]['y'] - prev_vertices[i]['y']) / 4
-                dx = abs(dx)
-                dy = abs(dy)
-                dist.append((dx**2 + dy**2)**0.5)
-            min_dist = min(dist)
-            if(min_dist > 200):
-                cluster.append([text])
-            else:
-                idx = len(cluster) + dist.index(min_dist) - min([len(cluster), 3])
-                cluster[idx].append(text)
-        chunks = []
-        for chunk in cluster:
-            chunk_ctx = ''
-            for text in chunk:
-                chunk_ctx += text['inferText']
-                if text['lineBreak']: chunk_ctx += '\n'
-                else: chunk_ctx += ' '
-            chunks.append(chunk_ctx)
-        end = time.time()
-        print(end - start)
+    async def loadImage(self, session, url):
+        async with session.get(url) as response:
+            return await response.content.read()
 
-        return context, chunks
-    
-    def imageProcessor(self, imgUrl=[]):
+    async def imageProcessor(self, imgUrl=[]):
         context = ''
         cluster = []
         cnt = 0
-        load_latency = []
-        process_latency = []
-        ocr_latency = []
-        for url in imgUrl:
-            '''
-            if cnt > 7: # 7장으로 제한
-                break
-            '''
-            # load image
-            start = time.time()
-            content = requests.get(url).content
-            img = Image.open(BytesIO(content))
-            end = time.time()
-            load_latency.append(end-start)
+        strings = []
 
-            # process iamge
-            start = time.time()
-            hw_ratio = 4
-            n = math.ceil(img.height / (img.width * hw_ratio))
-            list = []
-            for i in range(0, n):
-                if (i==n-1):
-                    list.append(img.crop((0, i*hw_ratio*img.width, img.width, img.height)))
-                else:
-                    list.append(img.crop((0, i*hw_ratio*img.width, img.width, (i+1)*hw_ratio*img.width)))
-                cnt += 1
-            end = time.time()
-            process_latency.append(end - start)
+        start = time.time()
+        async with aiohttp.ClientSession() as session:
+            imgs = await asyncio.gather(*(self.loadImage(session, url) for url in imgUrl))
+            for _img in imgs:
+                # load image
+                img = Image.open(BytesIO(_img))
 
-            # OCR
-            for el in list:
-                start = time.time()
-                buffer = io.BytesIO()
-                el.save(buffer, format='PNG')
-                el = buffer.getvalue()
-                string = base64.b64encode(el)
-                _ctx, _cluster = self.imgOCR(string)
-                context += _ctx
-                context += "\n"
-                cluster += _cluster
-                end = time.time()
-                ocr_latency.append(end - start)
-        '''
-        if len(ocr)>2000:
-            ocr = ocr[:2000]
-        alert = ''
-        if len(ocr) == 2000:
-            alert = '2000자 이상의 텍스트가 인식되었습니다'
-        else :
-            alert = f'{len(ocr)}자의 텍스트가 인식되었습니다'
-        '''
-        print(load_latency, process_latency, ocr_latency, len(context))
-        return context, cluster
+                # process iamge
+                hw_ratio = 5
+                n = math.ceil(img.height / (img.width * hw_ratio))
+                list = []
+                for i in range(0, n):
+                    if (i==n-1):
+                        list.append(img.crop((0, i*hw_ratio*img.width, img.width, img.height)))
+                    else:
+                        list.append(img.crop((0, i*hw_ratio*img.width, img.width, (i+1)*hw_ratio*img.width)))
+                    cnt += 1
+
+                # OCR
+                for el in list:
+                    buffer = io.BytesIO()
+                    el.save(buffer, format='PNG')
+                    el = buffer.getvalue()
+                    string = base64.b64encode(el)
+                    strings.append(string)
+        mid = time.time()
+        print('img load: ', mid-start)
+
+        async with aiohttp.ClientSession() as session:
+            context = ''
+            cluster = []
+            for j in range(math.ceil(len(strings) / 5)):
+                results = await asyncio.gather(*(self.imgOCR(_str, session, 'data') for _str in strings[5*j : 5*(j+1)]))
+                for result in results:
+                    context += result[0]
+                    cluster += result[1]
+            end = time.time()
+            print('ocr: ', end-mid)
+            return context, cluster
         
     def appendMessage(self, role, content):
         self._messages.append({"role":role, "content":content})
@@ -179,7 +169,7 @@ class SigonganAI:
     def getGPT(self, model = 'gpt-3.5-turbo-0613'):
         try:
             response = openai.ChatCompletion.create(
-                model = "gpt-3.5-turbo-0613",
+                model = model,
                 messages = self._messages,
                 temperature = 0.1
             )
@@ -189,3 +179,4 @@ class SigonganAI:
         tokens = response.usage.total_tokens
         self.appendMessage("assistant", answer)
         return answer, tokens
+    
