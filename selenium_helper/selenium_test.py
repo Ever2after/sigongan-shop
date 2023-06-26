@@ -2,8 +2,6 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 import time
-from fp.fp import FreeProxy
-from fake_useragent import UserAgent
 
 
 # 아무런 경고가 없다면 이상없이 작동되는 것입니다
