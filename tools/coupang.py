@@ -83,6 +83,7 @@ class Coupang:
             'type' : 'image',
             'platform' : 'coupang'
         })
+        print(response.json())
         return response.json()['imgUrls']
         
     

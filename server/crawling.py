@@ -83,8 +83,7 @@ async def get_bs4(request: Request):
             try:
                 driver = selenium_test.SeleniumTest().initDriver(url)
                 imgs = driver.find_elements(By.CLASS_NAME, "subType-IMAGE")
-                driver.quit()
-                return [img.find_element(By.TAG_NAME, "img").get_attribute("src") for img in imgs]
+                return {'imgUrls': [img.find_element(By.TAG_NAME, "img").get_attribute("src") for img in imgs]}
             except:
                 return False
         else:

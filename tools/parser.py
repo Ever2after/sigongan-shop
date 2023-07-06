@@ -89,7 +89,6 @@ class Parser:
             'type' : 'meta'
         })
         urlData = response.json()
-        print(urlData)
         
         gongan = SigonganAI()
         
