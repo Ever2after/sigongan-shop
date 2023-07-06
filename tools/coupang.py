@@ -4,6 +4,7 @@ from pathlib import Path
 from bs4 import BeautifulSoup
 import pandas as pd
 from selenium.webdriver.common.by import By
+from dotenv import load_dotenv
 
 wd = Path(__file__).parent.parent.resolve()
 sys.path.append(str(wd))
@@ -11,6 +12,10 @@ sys.path.append('../selenium_helper')
 from selenium_helper import selenium_test, selenium_mac
 from ai import *
 
+load_dotenv()
+
+# Crawling server url
+crawling_server_url = 'http://34.70.221.73:8000' #os.getenv('CRAWLING_SERVER_URL')
 
 class Coupang:
     def __init__(self):
@@ -65,14 +70,21 @@ class Coupang:
         }
         
     def get_imageUrl(self, url):
-        # selenium_test or _mac
+        '''
         driver = selenium_mac.SeleniumTest().initDriver(url) 
         list = []
         imgs = driver.find_elements(By.CLASS_NAME, "subType-IMAGE")
         for img in imgs:
             list.append(img.find_element(By.TAG_NAME, "img").get_attribute("src"))
         driver.quit()
-        return list
+        '''
+        response = requests.post(f'{crawling_server_url}/sel', json={
+            'url' : url,
+            'type' : 'image',
+            'platform' : 'coupang'
+        })
+        return response.json()['imgUrls']
+        
     
     async def image_read(self, url):
         imgUrl = self.get_imageUrl(url)
@@ -84,3 +96,5 @@ class Coupang:
                 context += _chunk
                 context += '\n'
         return context
+    
+    

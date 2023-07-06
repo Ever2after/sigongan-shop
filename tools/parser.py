@@ -84,8 +84,13 @@ class Parser:
         return _json
 
     def getReportTitle(self, url = '', text = '', messages = []):
-        urlData = self.linkParser(url)
+        response = requests.post('http://34.70.221.73:8000/bs4', json={
+            'url' : url,
+            'type' : 'meta'
+        })
+        urlData = response.json()
         print(urlData)
+        
         gongan = SigonganAI()
         
         prompt = '아래 문의 내용을 아주 짧은 제목으로 요약해줘\n'
@@ -132,31 +137,8 @@ class Parser:
         answer, _ = _gongan.getGPT('gpt-3.5-turbo-16k-0613')
         return answer
     
-    def linkParser(self, url):
-        try:
-            response = requests.get(url, headers = self.headers)
-        except:
-            return False
-        soup = BeautifulSoup(response.text, 'html.parser')
-        meta_tags = soup.find_all('meta')
-        result = {}
-        for tag in meta_tags:
-            attributes = tag.attrs
-            flag = [False, False]
-            for attr, value in attributes.items():
-                if(flag[0]):
-                    result['title'] = value
-                    flag[0] = False
-                if(flag[1]):
-                    result['description'] = value
-                    flag[1] = False
-                if ('title' in value): flag[0] = True
-                if ('description' in value): flag[1] = True
-        return result
-        
+
 if __name__ == '__main__':
     parser = Parser()
-    url = 'https://www.11st.co.kr/products/2023705975' #'https://www.coupang.com/vp/products/6113757443'
-    text = '후기가 어떻나요?'
-    answer = parser.getReportTitle(url, text)
+    answer = parser.getReportTitle('https://www.coupang.com/vp/products/6646236691', '이거 후기가 어떻나요')
     print(answer)

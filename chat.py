@@ -19,12 +19,13 @@ class Chat4me:
         newData = data
 
         if('coupang.com/vp/products' in messages[-1]['content']):
+            
             result = re.findall("(https:\/\/)|(coupang.com\/vp\/products\/[0-9]*)", messages[-1]['content'])
             list = []
             for el in result[:2]:
                 list.append(''.join(el))
             url = ''.join(list)
-
+            
             _coupang = coupang.Coupang()
             start = time.time()
             text = await _coupang.image_read(url)

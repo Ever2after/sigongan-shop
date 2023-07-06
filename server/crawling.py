@@ -34,11 +34,35 @@ def root():
 async def get_bs4(request: Request):
     body = await request.json()
     url = body['url']
-    try:
-        response = requests.get(url, headers=headers)
-        return response.text
-    except Exception as e:
-        return False
+    type = body['type']
+    if type == 'general':
+        try:
+            response = requests.get(url, headers=headers)
+            return response.text
+        except Exception as e:
+            return False
+    elif type == 'meta':
+        try:
+            response = requests.get(url, headers = headers)
+        except:
+            return False
+        soup = BeautifulSoup(response.text, 'html.parser')
+        meta_tags = soup.find_all('meta')
+        result = {}
+        for tag in meta_tags:
+            attributes = tag.attrs
+            flag = [False, False]
+            for attr, value in attributes.items():
+                if(flag[0]):
+                    result['title'] = value
+                    flag[0] = False
+                if(flag[1]):
+                    result['description'] = value
+                    flag[1] = False
+                if ('title' in value): flag[0] = True
+                if ('description' in value): flag[1] = True
+        return result
+    
     
 @app.post('/sel')
 async def get_bs4(request: Request):
@@ -59,6 +83,7 @@ async def get_bs4(request: Request):
             try:
                 driver = selenium_test.SeleniumTest().initDriver(url)
                 imgs = driver.find_elements(By.CLASS_NAME, "subType-IMAGE")
+                driver.quit()
                 return [img.find_element(By.TAG_NAME, "img").get_attribute("src") for img in imgs]
             except:
                 return False
