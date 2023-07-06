@@ -3,6 +3,8 @@ from pathlib import Path
 from fastapi import FastAPI, Request
 import requests
 from bs4 import BeautifulSoup
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 
 wd = Path(__file__).parent.parent.resolve()
 sys.path.append(str(wd))
@@ -20,7 +22,7 @@ headers = {
     "cookie": "PCID=31489593180081104183684; _fbp=fb.1.1644931520418.1544640325; gd1=Y; X-CP-PT-locale=ko_KR; MARKETID=31489593180081104183684; sid=03ae1c0ed61946c19e760cf1a3d9317d808aca8b; x-coupang-origin-region=KOREA; x-coupang-target-market=KR; x-coupang-accept-language=ko_KR;"
 }
 
-sel = selenium_mac.SeleniumTest()
+#sel = selenium_mac.SeleniumTest()
 
 app = FastAPI()
 
@@ -42,14 +44,29 @@ async def get_bs4(request: Request):
 async def get_bs4(request: Request):
     body = await request.json()
     url = body['url']
-    try:
-        driver = sel.initDriver(url)
-        html = driver.page_source
-        #sel.quit()
-        return html
-    except Exception as e:
-        print(e)
+    type = body['type']
+    platform = body['platform']
+    if type=='general':
+        try:
+            driver = selenium_test.SeleniumTest().initDriver(url)
+            html = driver.page_source
+            driver.quit()
+            return html
+        except Exception as e:
+            return False
+    elif type=='image':
+        if platform=='coupang':
+            try:
+                driver = selenium_test.SeleniumTest().initDriver(url)
+                imgs = driver.find_elements(By.CLASS_NAME, "subType-IMAGE")
+                return [img.find_element(By.TAG_NAME, "img").get_attribute("src") for img in imgs]
+            except:
+                return False
+        else:
+            return False
+    else:
         return False
+
     
     
     
