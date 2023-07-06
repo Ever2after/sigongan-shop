@@ -8,7 +8,7 @@ from selenium.webdriver.common.by import By
 wd = Path(__file__).parent.parent.resolve()
 sys.path.append(str(wd))
 sys.path.append('../selenium_helper')
-from selenium_helper import selenium_test
+from selenium_helper import selenium_test, selenium_mac
 from ai import *
 
 
@@ -65,7 +65,8 @@ class Coupang:
         }
         
     def get_imageUrl(self, url):
-        driver = selenium_test.SeleniumTest().initDriver(url)
+        # selenium_test or _mac
+        driver = selenium_mac.SeleniumTest().initDriver(url) 
         list = []
         imgs = driver.find_elements(By.CLASS_NAME, "subType-IMAGE")
         for img in imgs:

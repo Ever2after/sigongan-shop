@@ -10,6 +10,7 @@ sys.path.append('../tools')
 
 from chat import *
 from tools import parser
+from selenium_helper import * 
 
 app = FastAPI()
 
@@ -36,9 +37,13 @@ async def get_answer(request: Request):
         'data': data
     }
 
-@app.get('/report/title/{input}')
-def get_title(input: str):
-    title = _parser.getReportTitle(input)
+@app.post('/report/title')
+async def get_title(request: Request):
+    body = await request.json()
+    url = body['url']
+    text = body['text']
+    messages = body['messages']
+    title = _parser.getReportTitle(url, text, messages)
     return {
         'title' : title
     }

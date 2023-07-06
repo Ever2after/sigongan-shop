@@ -118,7 +118,7 @@ class SigonganAI:
         strings = []
 
         start = time.time()
-        async with aiohttp.ClientSession() as session:
+        async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=False)) as session:
             imgs = await asyncio.gather(*(self.loadImage(session, url) for url in imgUrl))
             for _img in imgs:
                 # load image
@@ -145,7 +145,7 @@ class SigonganAI:
         mid = time.time()
         print('img load: ', mid-start)
 
-        async with aiohttp.ClientSession() as session:
+        async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=False)) as session:
             context = ''
             cluster = []
             for j in range(math.ceil(len(strings) / 5)):

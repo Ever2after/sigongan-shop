@@ -1,7 +1,24 @@
+import sys
+from pathlib import Path
+wd = Path(__file__).parent.parent.resolve()
+sys.path.append(str(wd))
 from ai import *
 import re
+import requests
+from bs4 import BeautifulSoup
 
 class Parser:
+    def __init__(self):
+        self.headers = {
+            "authority": "www.coupang.com",
+            "method": "GET",
+            "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+            "accept-encoding": "gzip, deflate, br",
+            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.104 Whale/3.13.131.36 Safari/537.36",
+            "sec-ch-ua-platform": "macOS",
+            "cookie": "PCID=31489593180081104183684; _fbp=fb.1.1644931520418.1544640325; gd1=Y; X-CP-PT-locale=ko_KR; MARKETID=31489593180081104183684; sid=03ae1c0ed61946c19e760cf1a3d9317d808aca8b; x-coupang-origin-region=KOREA; x-coupang-target-market=KR; x-coupang-accept-language=ko_KR;"
+        }
+    
     def getFeature(self, messages, data):
         text = messages[-1]['content']
         _gongan = SigonganAI()
@@ -66,7 +83,11 @@ class Parser:
             return False
         return _json
 
-    def getReportTitle(self, text):
+    def getReportTitle(self, url = '', text = '', messages = []):
+        urlData = self.linkParser(url)
+        print(urlData)
+        gongan = SigonganAI()
+        
         prompt = '아래 문의 내용을 아주 짧은 제목으로 요약해줘\n'
         prompt += '[예시1]\n'
         prompt += '문의 내용 : 8만원 이하의 들고 다닐 수 있는 녹음기를 추천해주세요. 5시간 이상 녹음이 가능했으면 좋겠어요.\n'
@@ -74,11 +95,13 @@ class Parser:
         prompt += '[예시2]\n'
         prompt += '문의 내용 : 어깨끈이 달린 오프숄더 블라우스를 사고싶은데 색은 상관없구 아무 무늬가 없고 프릴 달린거나 레이스가 있어도 상관없어요.\n'
         prompt += '제목 : 오프숄더 블라우스\n'
-        prompt += f'문의 내용 : {text}\n'
-        prompt += '제목 : '
-        _gongan = SigonganAI()
-        _gongan.appendMessage('user', prompt)
-        answer, _ = _gongan.getGPT()
+        if(text): prompt += f'문의 내용 : {text}\n'
+        if(url): prompt += f'문의한 상품의 정보 : {urlData}]\n'
+        if(messages != []): prompt += f'대화 내용 : {messages}\n'
+        prompt += '제목 :' 
+        
+        gongan.appendMessage('user', prompt)
+        answer, _ = gongan.getGPT()
         return answer
     
     def summaryDetails(self, text):
@@ -108,3 +131,32 @@ class Parser:
         _gongan.appendMessage('user', prompt)
         answer, _ = _gongan.getGPT('gpt-3.5-turbo-16k-0613')
         return answer
+    
+    def linkParser(self, url):
+        try:
+            response = requests.get(url, headers = self.headers)
+        except:
+            return False
+        soup = BeautifulSoup(response.text, 'html.parser')
+        meta_tags = soup.find_all('meta')
+        result = {}
+        for tag in meta_tags:
+            attributes = tag.attrs
+            flag = [False, False]
+            for attr, value in attributes.items():
+                if(flag[0]):
+                    result['title'] = value
+                    flag[0] = False
+                if(flag[1]):
+                    result['description'] = value
+                    flag[1] = False
+                if ('title' in value): flag[0] = True
+                if ('description' in value): flag[1] = True
+        return result
+        
+if __name__ == '__main__':
+    parser = Parser()
+    url = 'https://www.11st.co.kr/products/2023705975' #'https://www.coupang.com/vp/products/6113757443'
+    text = '후기가 어떻나요?'
+    answer = parser.getReportTitle(url, text)
+    print(answer)
