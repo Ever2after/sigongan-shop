@@ -40,9 +40,15 @@ async def get_answer(request: Request):
 @app.post('/report/title')
 async def get_title(request: Request):
     body = await request.json()
-    url = body['url']
-    text = body['text']
-    messages = body['messages']
+    url = ''
+    text = ''
+    messages = []
+    if "url" in body:
+        url = body['url']
+    if "test" in body:
+        text = body['text']
+    if "messages" in body:
+        messages = body['messages']
     title = _parser.getReportTitle(url, text, messages)
     return {
         'title' : title
