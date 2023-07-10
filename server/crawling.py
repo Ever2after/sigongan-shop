@@ -65,7 +65,7 @@ async def get_bs4(request: Request):
     
     
 @app.post('/sel')
-async def get_bs4(request: Request):
+async def get_sel(request: Request):
     body = await request.json()
     url = body['url']
     type = body['type']
@@ -84,6 +84,13 @@ async def get_bs4(request: Request):
                 driver = selenium_test.SeleniumTest().initDriver(url)
                 imgs = driver.find_elements(By.CLASS_NAME, "subType-IMAGE")
                 return {'imgUrls': [img.find_element(By.TAG_NAME, "img").get_attribute("src") for img in imgs]}
+            except:
+                return False
+        elif platform=='general':
+            try:
+                driver = selenium_test.SeleniumTest().initDriver(url)
+                imgs = driver.find_elements(By.TAG_NAME, 'img')
+                return [{'url': img.get_attribute('src'), 'alt': img.get_attribute('alt')} for img in imgs]
             except:
                 return False
         else:
