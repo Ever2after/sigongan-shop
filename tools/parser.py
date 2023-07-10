@@ -6,6 +6,7 @@ from ai import *
 import re
 import requests
 from bs4 import BeautifulSoup
+from urllib.parse import urlparse
 
 class Parser:
     def __init__(self):
@@ -136,8 +137,13 @@ class Parser:
         answer, _ = _gongan.getGPT('gpt-3.5-turbo-16k-0613')
         return answer
     
+    def urlParser(self, text):
+        urls = re.findall("http[s]*:\/\/(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9][a-zA-Z0-9-_/.?=]*", text)
+        return urls
+                
+
 
 if __name__ == '__main__':
     parser = Parser()
-    answer = parser.getReportTitle('https://www.coupang.com/vp/products/6646236691', '이거 후기가 어떻나요')
+    answer = parser.urlParser("안녕하세요 ㅋㅋㅋhttps://naver.com 하위~~~")
     print(answer)

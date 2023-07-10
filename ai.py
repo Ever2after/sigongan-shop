@@ -179,4 +179,5 @@ class SigonganAI:
         tokens = response.usage.total_tokens
         self.appendMessage("assistant", answer)
         return answer, tokens
+
     

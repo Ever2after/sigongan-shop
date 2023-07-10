@@ -5,6 +5,9 @@ from bs4 import BeautifulSoup
 import pandas as pd
 from selenium.webdriver.common.by import By
 from dotenv import load_dotenv
+import hmac
+import hashlib
+from time import gmtime, strftime
 
 wd = Path(__file__).parent.parent.resolve()
 sys.path.append(str(wd))
@@ -17,18 +20,13 @@ load_dotenv()
 # Crawling server url
 crawling_server_url = 'http://34.70.221.73:8000' #os.getenv('CRAWLING_SERVER_URL')
 
-class Coupang:
-    def __init__(self):
-        self.headers = {
-            "authority": "www.coupang.com",
-            "method": "GET",
-            "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-            "accept-encoding": "gzip, deflate, br",
-            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.104 Whale/3.13.131.36 Safari/537.36",
-            "sec-ch-ua-platform": "macOS",
-            "cookie": "PCID=31489593180081104183684; _fbp=fb.1.1644931520418.1544640325; gd1=Y; X-CP-PT-locale=ko_KR; MARKETID=31489593180081104183684; sid=03ae1c0ed61946c19e760cf1a3d9317d808aca8b; x-coupang-origin-region=KOREA; x-coupang-target-market=KR; x-coupang-accept-language=ko_KR;"
-        }
+# Coupang partners api url
+coupang_partners_api_domain = "https://api-gateway.coupang.com"
+coupang_partners_api_url = "/v2/providers/affiliate_open_api/apis/openapi/v1/deeplink"
+coupang_partners_access_key = "9e20cccc-8d69-4a9b-bce6-64adb6729692" # os.getenv('COUPANG_PARTNERS_ACCESS_KEY')
+coupang_partners_secret_key = "b1fbf2021aa5f39b747a49efc10169be0b0c43eb" # os.getenv('COUPANG_PARTNERS_SECRET_KEY')
 
+class Coupang:
     def item_list_url(self, keyword, page):
         return f"https://www.coupang.com/np/search?component=&q={keyword}&channel=user&page={page}"
     
@@ -70,14 +68,6 @@ class Coupang:
         }
         
     def get_imageUrl(self, url):
-        '''
-        driver = selenium_mac.SeleniumTest().initDriver(url) 
-        list = []
-        imgs = driver.find_elements(By.CLASS_NAME, "subType-IMAGE")
-        for img in imgs:
-            list.append(img.find_element(By.TAG_NAME, "img").get_attribute("src"))
-        driver.quit()
-        '''
         response = requests.post(f'{crawling_server_url}/sel', json={
             'url' : url,
             'type' : 'image',
@@ -98,4 +88,30 @@ class Coupang:
                 context += '\n'
         return context
     
-    
+    def getDeeplink(self, urls):
+        REQUEST = { "coupangUrls": urls }
+        authorization = self.generateHmac('POST', coupang_partners_api_url, coupang_partners_secret_key, coupang_partners_access_key)
+        url = "{}{}".format(coupang_partners_api_domain, coupang_partners_api_url)
+        try:
+            response = requests.request(method='POST', url=url,
+                                        headers={
+                                            "Authorization": authorization,
+                                            "Content-Type": "application/json"
+                                        },
+                                        data=json.dumps(REQUEST)
+                                        )
+            return response.json()
+        except:
+            return False
+
+
+    def generateHmac(self, method, url, secretKey, accessKey):
+        path, *query = url.split("?")
+        datetimeGMT = strftime('%y%m%d', gmtime()) + 'T' + strftime('%H%M%S', gmtime()) + 'Z'
+        message = datetimeGMT + method + path + (query[0] if query else "")
+
+        signature = hmac.new(bytes(secretKey, "utf-8"),
+                            message.encode("utf-8"),
+                            hashlib.sha256).hexdigest()
+
+        return "CEA algorithm=HmacSHA256, access-key={}, signed-date={}, signature={}".format(accessKey, datetimeGMT, signature)

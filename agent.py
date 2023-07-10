@@ -11,10 +11,14 @@ class Agent():
                 'description' : 'get detailed information of specific oroduct such as price, delivery, spec, review',
                 'output' : '{name, price, delivery date, shipping price, spec, brand, review, ...}'
             },
+            'comparison': {
+                'description' : 'compare each product according to customer needs and export the report',
+                'output' : '{in my recommendation, ~is the best product because, ~}'
+            }
         }
         
     def selectApi(self, messages, data):
-        text = messages[-1]['content']
+        text = messages[-3:]
         _gongan = SigonganAI()
 
         prompt = 'You are the online shopping mall AI guidence.'
@@ -25,6 +29,7 @@ class Agent():
 
         _gongan.appendMessage('user', prompt)
         answer, _ = _gongan.getGPT()
+        print(answer)
         return answer
     
     

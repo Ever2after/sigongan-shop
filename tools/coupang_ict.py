@@ -32,6 +32,6 @@ class CoupangICT:
 if __name__ == '__main__':
     coupang = CoupangICT()
     #items = coupang.get_items_by_keyword('게이밍 키보드')
-    item = coupang.get_item_by_id('5613493496')
+    item = coupang.get_history('1263162')
     print(item)
     

@@ -18,30 +18,26 @@ class Chat4me:
         answer = ''
         newData = data
 
-        if('coupang.com/vp/products' in messages[-1]['content']):
-            
-            result = re.findall("(https:\/\/)|(coupang.com\/vp\/products\/[0-9]*)", messages[-1]['content'])
-            list = []
-            for el in result[:2]:
-                list.append(''.join(el))
-            url = ''.join(list)
-            
-            _coupang = coupang.Coupang()
-            start = time.time()
-            text = await _coupang.image_read(url)
-            mid = time.time()
-            summary = self.parser.summaryDetails(text)
-            end = time.time()
-            latency += [mid-start, end-mid]
+        urls = self.parser.urlParser(messages[-1]['content'])
+        if(urls):
+            if('coupang' in urls[0]):
+                _coupang = coupang.Coupang()
 
-            product_info = {}
-            product_info['detail'] = summary
-            
-            newData = product_info
-            answer = summary
+                start = time.time()
+                text = await _coupang.image_read(urls[0])
+                mid = time.time()
+                summary = self.parser.summaryDetails(text)
+                end = time.time()
+                latency += [mid-start, end-mid]
 
-            end = time.time()
-            latency.append(end-start)
+                product_info = {}
+                product_info['detail'] = summary
+                
+                newData = product_info
+                answer = summary
+
+                end = time.time()
+                latency.append(end-start)
         
         else:
             # select api latency
